@@ -4,10 +4,10 @@ Welcome to the AI Red Teaming Lab! This environment is pre-configured to test La
 
 ## Features & Tools Included
 
-This lab utilizes three complimentary open-source frameworks:
+This lab utilizes three complementary open-source frameworks:
 
 1.  **[Garak](https://garak.ai/)**: The "Nmap for LLMs." A vulnerability scanner that probes for prompt injections, jailbreaks, data leakage, and more.
-2.  **[Microsoft PyRIT](https://github.com/Azure/PyRIT)**: The Python Risk Identification Tool. A framework for orchestrated, programmatic red teaming of generative AI using multi-turn conversations and memory.
+2.  **[Microsoft PyRIT](https://github.com/Azure/PyRIT)**: The Python Risk Identification Tool. A framework for orchestrated, programmatic red teaming of generative AI using multi-turn conversations and persistent memory.
 3.  **[Promptfoo](https://promptfoo.dev/)**: An extensible framework for running rapid, matrix-based adversarial evaluations against LLM applications from a configuration file, featuring web-based reporting.
 
 ---
@@ -32,45 +32,81 @@ Open a PowerShell terminal in this directory and run the setup script. This will
 
 *(Note: During the Promptfoo installation, you might see npm warnings. Ignore them unless the installation explicitly fails).*
 
+### 2. Set Your API Key
+Before running any tool, set the Gemini API key in your current session:
+
+```powershell
+$env:GEMINI_API_KEY = "your-api-key-here"
+```
+
 ---
 
 ## Running the Red Team Tools
 
-Before running any scans, ensure you have your API key ready. The scripts will prompt you for it if it's not set as an environment variable (`$env:GEMINI_API_KEY = "your_key_here"`).
-
 ### 🛠️ Garak: Vulnerability Scanner
 
-To run automated vulnerability probes against Gemini:
+Garak scans for LLM vulnerabilities using automated probes. It connects to Gemini via the OpenAI-compatible REST API (configured in `garak_gemini.yaml`).
 
 ```powershell
 .\run_garak.ps1
 ```
-You will be prompted to choose which probe class to execute (e.g., prompt injections, jailbreaks, or all). Detailed JSONL reports are saved in the `garak_runs/` directory.
+
+You will be prompted to choose a probe class (e.g., prompt injections, DAN exploits, encoding attacks). Reports are saved in the `garak_runs/` directory as JSONL.
+
+**Available probes:** `promptinject`, `dan`, `gcg`, `glitch`, `encoding`, `lmrc`, or `all`.
 
 ### 🐍 PyRIT: Microsoft's Risk Identification Tool
 
-To run a demonstration of PyRIT's orchestrated attacks:
+PyRIT sends adversarial payloads to Gemini and records the full conversation in a local SQLite database for forensic analysis.
 
 ```powershell
 .\run_pyrit.ps1
 ```
-This runs a predefined set of adversarial payloads asynchronously. The conversational history and memory are stored locally in the `pyrit_results.db` database. You can customize the payloads by editing `run_pyrit_demo.py`.
+
+This runs five predefined adversarial payloads (system prompt extraction, jailbreak, harmful knowledge elicitation, credential exfiltration, encoding bypass). Results are stored in `pyrit_results.db`.
 
 ### ⚡ Promptfoo: Rapid Adversarial Matrix
 
-To run deterministic safety assertions based on the `promptfoo.yaml` configuration:
+Promptfoo runs deterministic safety assertions against the model from a YAML config and generates a web-based report.
 
 ```powershell
 .\run_promptfoo.ps1
 ```
-This script will execute the tests and automatically open a local web server (typically at `http://localhost:15500`) to display a detailed matrix comparing the payloads against the model's responses and assertions.
+
+This will execute the evaluation matrix and open a local web viewer (typically at `http://localhost:15500`) showing the results. The config is in `promptfoo.yaml`.
 
 ---
 
 ## Customizing the Target Model
 
-By default, the scripts target `gemini-1.5-pro`. 
+By default, all tools target **`gemini-2.0-flash`**.
 
--   **Garak**: Edit the `$ModelName` variable in `run_garak.ps1`.
--   **PyRIT**: Edit the `model_name` parameter in `run_pyrit_demo.py`.
+-   **Garak**: Edit the `name` field in `garak_gemini.yaml`.
+-   **PyRIT**: Edit the `MODEL_NAME` constant in `run_pyrit_demo.py`.
 -   **Promptfoo**: Edit the `providers` section in `promptfoo.yaml`.
+
+---
+
+## Project Structure
+
+```
+garak-lab/
+├── setup.ps1              # One-time environment setup
+├── garak_gemini.yaml      # Garak generator config (Gemini → OpenAI-compatible)
+├── run_garak.ps1          # Garak scanner launcher
+├── run_pyrit.ps1          # PyRIT launcher
+├── run_pyrit_demo.py      # PyRIT adversarial payload script
+├── run_promptfoo.ps1      # Promptfoo launcher
+├── promptfoo.yaml         # Promptfoo adversarial evaluation config
+├── promptfoo_test.yaml    # Promptfoo mock test (no API key needed)
+├── echo.py                # Mock echo provider for promptfoo testing
+└── README.md              # This file
+```
+
+---
+
+## Technical Notes
+
+-   **Garak** uses the `openai.OpenAICompatible` generator to talk to Gemini's OpenAI-compatible endpoint at `https://generativelanguage.googleapis.com/v1beta/openai/`.
+-   **PyRIT** uses `OpenAIChatTarget` (from PyRIT v0.11+) pointed at the same endpoint. Memory is stored in a local SQLite database via `CentralMemory`.
+-   **Promptfoo** uses its built-in `google:` provider prefix which calls the Gemini API natively.
