@@ -23,6 +23,9 @@ if (-not $env:GEMINI_API_KEY) {
 # Garak's OpenAICompatible generator reads the key from this env var:
 $env:OPENAICOMPATIBLE_API_KEY = $env:GEMINI_API_KEY
 
+# Force UTF-8 so garak's emoji output doesn't crash on Windows codepages
+$env:PYTHONUTF8 = "1"
+
 # ── Check for Virtual Environment ──────────────────────────────────────────
 $GarakExe = ".\$VirtualEnvName\Scripts\garak.exe"
 if (-not (Test-Path -Path $GarakExe)) {

@@ -23,7 +23,7 @@ if (-not (Get-Command $GlobalNodePackage -ErrorAction SilentlyContinue)) {
 }
 
 Write-Host "`nRunning Promptfoo Matrix Evaluation (promptfoo.yaml)..."
-Write-Host "Target: Google Gemini 1.5 Pro`n"
+Write-Host "Target: Google Gemini 2.0 Flash`n"
 
 # Run Promptfoo Eval
 & $GlobalNodePackage eval --config promptfoo.yaml

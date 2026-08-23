@@ -24,6 +24,9 @@ if (-not (Test-Path -Path ".\$VirtualEnvName\Scripts\python.exe")) {
 
 Write-Host "`nExecuting Microsoft PyRIT Demonstration (run_pyrit_demo.py)...`n"
 
+# Force UTF-8 output on Windows
+$env:PYTHONUTF8 = "1"
+
 # Run PyRIT Demo
 & ".\$VirtualEnvName\Scripts\python.exe" "run_pyrit_demo.py"
 

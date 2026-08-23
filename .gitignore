@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Scan results / engagement data (never commit)
+reports/
+*.db
+*.sqlite*
+garak_runs/
+pyrit_results.db
+
+# Secrets & local config
+.env
+.env.*
+*.key
+scope.json
+
+# Node
+node_modules/
+
+# AI session artifacts
+.ai-memory/

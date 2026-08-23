@@ -81,7 +81,7 @@ This will execute the evaluation matrix and open a local web viewer (typically a
 
 By default, all tools target **`gemini-2.0-flash`**.
 
--   **Garak**: Edit the `name` field in `garak_gemini.yaml`.
+-   **Garak**: Edit the `target_name` field in `garak_gemini.yaml`.
 -   **PyRIT**: Edit the `MODEL_NAME` constant in `run_pyrit_demo.py`.
 -   **Promptfoo**: Edit the `providers` section in `promptfoo.yaml`.
 
